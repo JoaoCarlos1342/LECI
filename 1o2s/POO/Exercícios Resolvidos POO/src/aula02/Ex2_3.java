@@ -1,3 +1,5 @@
+package aula02;
+
 import java.util.Scanner;
 
 public class Ex2_3 {
@@ -5,13 +7,13 @@ public class Ex2_3 {
         Scanner sc = new Scanner(System.in);
 
         System.out.print("Quantidade de água (M em kg): ");
-        double m = sc.nextDouble(); // Massa em kg 
+        double m = sc.nextDouble(); // Massa em kg
 
         System.out.print("Temperatura inicial (Celsius): ");
-        double tempInicial = sc.nextDouble(); // 
+        double tempInicial = sc.nextDouble(); //
 
         System.out.print("Temperatura final (Celsius): ");
-        double tempFinal = sc.nextDouble(); // 
+        double tempFinal = sc.nextDouble(); //
 
         // Cálculo da energia Q em Joules [cite: 21]
         double q = m * (tempFinal - tempInicial) * 4184;
