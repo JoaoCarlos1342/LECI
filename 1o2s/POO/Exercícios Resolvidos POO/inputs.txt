@@ -1,0 +1,8 @@
+INT
+100
+LISTINT
+10 11 12 13 14 15 16 17 18 19
+STRING
+Isto é uma String de Teste
+LISTSTRING
+Isto é uma Lista de Strings de Teste
