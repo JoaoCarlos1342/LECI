@@ -1,0 +1,42 @@
+	.eqv SIZE, 20
+	.eqv print_string, 4
+	.eqv read_string, 8
+
+	.data
+msg:	.asciiz "Introduza uma string: "
+str:	.space 21
+
+	.text
+	.globl main
+main:
+	la	$a0, msg
+	li	$v0, print_string
+	syscall
+
+	la	$a0, str
+	li	$a1, SIZE
+	li	$v0, read_string
+	syscall
+
+	la	$t0, str
+
+while:
+	lb	$t1, 0($t0)
+	beq	$t1, '\0', endw
+
+if:
+	blt	$t1, 'a', endif
+	bgt	$t1, 'z', endif
+	addi	$t1, $t1, -32
+	sb	$t1, 0($t0)
+
+endif:
+	addiu	$t0, $t0, 1
+	j	while
+
+endw:
+	la	$a0, str
+	li	$v0, print_string
+	syscall
+
+	jr	$ra

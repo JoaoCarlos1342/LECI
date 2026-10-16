@@ -1,0 +1,27 @@
+	.eqv SIZE, 4
+	.eqv print_int10, 1
+
+	.data
+array:	.word 7692, 23, 5, 234
+
+	.text
+	.globl main
+main:
+	li	$t0, 0
+	li	$t1, 0
+
+for:
+	bge	$t0, SIZE, endfor
+	la	$t2, array
+	sll	$t3, $t0, 2
+	addu	$t4, $t2, $t3
+	lw	$t5, 0($t4)
+	add	$t1, $t1, $t5
+	addi	$t0, $t0, 1
+	j	for
+
+endfor:
+	move	$a0, $t1
+	li	$v0, print_int10
+	syscall
+	jr	$ra
