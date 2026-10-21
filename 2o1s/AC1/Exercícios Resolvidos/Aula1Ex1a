@@ -1,0 +1,32 @@
+# y = 2x + 8
+
+# Mapa de Registos
+# x:  $t0
+# 2x: $t1
+# y:  $t2
+
+	.eqv	print_int10, 1
+	.eqv	print_string, 4
+	.eqv	read_int10, 5
+	.data
+str:	.asciiz "Insere um numero: \n"
+	.text
+	.globl main
+	
+main:
+	la	$a0, str
+	li	$v0, print_string
+	syscall
+	
+	li	$v0, read_int10
+	syscall
+	move	$t0, $v0
+	
+	ori	$t3, $0, 8
+	add	$t1, $t0, $t0
+	add	$t2, $t1, $t3
+	
+	move	$a0, $t2
+	li	$v0, print_int10
+	syscall
+	jr	$ra
