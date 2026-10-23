@@ -1,0 +1,60 @@
+# Mapa de Registos
+# gray:    $t0
+# n:       $t1 (contador de bits)
+# shift:   $t2 (valor do deslocamento em potências de 2)
+# temp:    $t3 (guarda o valor deslocado para o XOR)
+
+	.eqv    print_int10, 1
+	.eqv    print_string, 4
+	.eqv    read_int, 5
+	.eqv    print_intbin, 35
+    
+	.data
+str:    .asciiz "Insere um numero: "
+
+	.text
+	.globl main
+
+main:        
+	la	$a0, str        
+	li	$v0, print_string    
+	syscall                
+	
+	li	$v0, read_int        
+	syscall                
+	move	$t0, $v0        
+	                    
+	li	$t1, 0           # Contador de bits (n)
+	move	$t2, $t0         # Cópia do número original
+	                    
+conta_bits:                
+	beq	$t2, $0, fim     # Se o número chegou a zero, termina
+	srl	$t2, $t2, 1      # Desloca 1 bit para a direita
+	addi	$t1, $t1, 1      # Incrementa o contador
+	j	conta_bits            
+                    
+fim:                    
+    # $t1 contém o número de bits
+	li	$t2, 16          # Inicia o deslocamento na potência máxima de 16 bits
+
+encontra_shift_inicial:
+	beq	$t2, $0, end_while     # Segurança caso n = 0
+	blt	$t2, $t1, do_while     # Quando o shift for menor que o nº de bits, avança
+	srl	$t2, $t2, 1            # shift = shift / 2
+	j	encontra_shift_inicial
+    
+do_while:
+	beq	$t2, $0, end_while     # Condição de saída: shift chega a 0
+	    
+	srlv	$t3, $t0, $t2          # $t3 = num >> shift
+	xor	$t0, $t0, $t3          # num = num ^ (num >> shift)
+    
+	srl	$t2, $t2, 1            # Divide o valor do shift por 2 (ex: 8 -> 4 -> 2 -> 1)
+	j	do_while
+    
+end_while:
+	move	$a0, $t0
+	li	$v0, print_intbin
+	syscall
+    
+	jr	$ra
