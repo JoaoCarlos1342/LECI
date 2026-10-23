@@ -1,0 +1,54 @@
+# Mapa de Registos
+# soma:  $t0
+# value: $t1
+# i:	 $t2
+
+	.eqv	print_string, 4
+	.eqv	SIZE
+	.eqv	print_int10, 1
+	.eqv	read_int10, 5
+	
+	.data
+str1:	.asciiz "Introduza um numero: "
+str2:	.asciiz "Valor ignorado\n"
+str3:	.asciiz "A soma dos positivos e: "
+
+	.text
+	.globl main
+	
+main:
+	li	$t0, 0
+	li	$t2, 0
+	
+for:
+	bge	$t2, SIZE, end_for
+	la	$a0, str1
+	li	$v0, print_string
+	syscall
+	
+	li	$v0, read_int10
+	syscall
+	move	$t1, $v0
+	
+	ble	$t1, 0, else
+	add	$t0, $t0, $t1
+	addi	$t2, $t2, 1
+	j	for
+	
+else:
+	la	$a0, str2
+	li	$v0, print_string
+	syscall
+	addi	$t2, $t2, 1
+	j	for
+	
+end_for:
+	la	$a0, str3
+	li	$v0, print_string
+	syscall
+	
+	move	$a0, $t0
+	li	$v0, print_int10
+	syscall
+	
+	jr	$ra
