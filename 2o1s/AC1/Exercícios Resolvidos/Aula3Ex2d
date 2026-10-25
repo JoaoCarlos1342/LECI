@@ -1,0 +1,65 @@
+# Mapa de Registos
+# value: $t0
+# bit:	 $t1
+# i:	 $t2
+# i/4:	 $t3
+# flag:  $t4
+# char:	 $t5
+
+	.eqv	SIZE, 32
+	.eqv	print_int10, 1
+	.eqv	read_int, 5
+	.eqv	print_string, 4
+	.eqv	print_char, 11
+
+	.data
+str1:	.asciiz "Introduza um numero: "
+str2:	.asciiz "\nO valor em binário e:"
+str3:	.asciiz " "
+
+	.text
+	.globl main
+	
+main:
+	li	$t2, 0			# i = 0
+	li	$t4, 0			# flag = 0
+	la	$a0, str1		# instrução virtual
+	li	$v0, print_string	# instrução virtual
+	syscall				# print(str1)
+	li	$v0, read_int		# instrução virtual
+	syscall				# value = read_int()
+	move	$t0, $v0		# instrução virtual
+	la	$a0, str2		# instrução virtual
+	li	$v0, print_string	# instrução virtual
+	syscall				# print_string(str2)
+	
+for:
+	bge	$t2, SIZE, end_for
+	srl	$t1, $t0, 31		# bit = value >> 31
+	beq	$t4, 1, do_print	# if(flag == 1)
+	beq	$t1, 0, skip_if		# if(bit != 0)
+
+
+do_print:
+	li	$t4, 1			# flag = 1
+	rem	$t3, $t2, 4		# i % 4
+	bne	$t3, $0, char_only	# if((i % 4) == 0)
+	la	$a0, str3		# instrução virtual
+	li	$v0, print_string	# instrução virtual
+	syscall				# print_string(' ')
+	
+char_only:
+	addi	$t5, $t1, 0x30		# char = bit + 0x30
+	move	$a0, $t5		# instrução virtual
+	li	$v0, print_char		# instrução virtual
+	syscall				# print_char(char)
+	
+skip_if:
+	sll	$t0, $t0, 1		# value = value << 1
+	addi	$t2, $t2, 1		# i++
+	j	for
+	
+end_for:
+	jr	$ra
+	
+#1431655765
