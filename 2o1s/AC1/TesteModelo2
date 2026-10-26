@@ -1,0 +1,62 @@
+# Mapa de Registos	
+# i:	          $t0
+# v:	          $t1
+# p:		  $t2
+# val ou &val[0]: $t3
+# offset:	  $t4
+# val[i + SIZE/2: $t5
+
+	.eqv	SIZE, 8
+	.eqv	print_int10, 1
+	.eqv	print_string, 4
+	.eqv	print_char, 11
+	
+	.data
+val:	.word	8,5,15,-1987,327,-9,27,16
+str:	.asciiz	"Result is: "
+	.text
+	.globl main
+	
+main:
+	li	$t0, 0		# i = 0
+	la	$t3, val	# carregamento de val
+	
+do_while:
+	sll	$t4, $t0, 2	# i << 2 ---> i * 4
+	addu	$t4, $t3, $t4	# offset = i * 4
+	lw	$t1, 0($t4)	# v = val[i]
+				# SIZE/2: 8/2=4 ---> 4*4 = 16
+	lw	$t5, 16($t4)	# val[i + SIZE/2]
+	
+	sw	$t5, 0($t4)	# val[i] = val[i + SIZE/2]
+	sw	$t1, 16($t4)	# val[i + SIZE/2] = v
+	
+	addi	$t0, $t0, 1	#i++
+	blt	$t0, 4, do_while# while (i++ < (SIZE/2))
+	
+	la	$a0, str
+	li	$v0, print_string
+	syscall
+	
+	la	$t2, val
+	
+	la	$t6, val
+	addiu	$t6, $t6, 32
+	
+while:
+	bge	$t2, $t6, end_while
+	
+	lw	$a0, 0($t2)
+	li	$v0, print_int10
+	syscall
+	
+	addiu	$t2, $t2, 4
+	
+	li	$a0, ','
+	li	$v0, print_char
+	syscall
+	
+	j	while
+	
+end_while:
+	jr	$ra
