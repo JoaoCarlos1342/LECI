@@ -1,0 +1,42 @@
+# Mapa de Registos
+# i:	  $t0
+# l:	  $t1
+# lista:  $t3
+# offset: $t4
+
+	.eqv	SIZE, 5
+	.eqv	print_int10, 1
+	.eqv	read_int, 5
+	.eqv	print_string, 4
+	
+	.data
+str:	.asciiz "\nIntroduza um numero: "
+	.align	2
+lista:	.space	20
+	.text
+	.globl main
+
+main:
+	li	$t0, 0			# i = 0
+	la	$t3, lista		# carregar lista
+	
+for:
+	bge	$t0, SIZE, end_for
+	
+	la	$a0, str		#
+	li	$v0, print_string	#
+	syscall				# print_string(str)
+	
+	li	$v0, read_int		#
+	syscall				# lista[i] = read_int
+	move 	$t1, $v0
+	#contas
+	#mul	$t4, $t0, 4		# i*4
+	sll	$t4, $t0, 2		# i << 4 ---> i*4
+	addu	$t4, $t3, $t4		# offset = i*4
+	sw	$t1, 0($t4)		# l = lista[i]
+	addi	$t0, $t0, 1		# i++
+	j	for
+
+end_for:
+	jr	$ra

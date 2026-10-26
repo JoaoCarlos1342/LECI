@@ -1,0 +1,104 @@
+# Mapa de Registos
+# i:	      $t0
+# lista:      $t1
+# offset:     $t2
+# value:      $t3
+# houveTroca: $t4
+# lista[i]:   $t5
+# lista[i+1]: $t6
+# aux:	      $t7
+
+
+	.eqv	SIZE, 10
+	.eqv	TRUE, 1
+	.eqv	FALSE, 0
+	.eqv	print_int10, 1
+	.eqv	read_int, 5
+	.eqv	print_string, 4
+	
+	.data
+	.align	2
+lista:	.space	40
+str1:	.asciiz "\nIntroduza um numero: "
+str2:	.asciiz "\nConteudo do array: "
+str3:	.asciiz "; "
+	.text
+	.globl main
+
+main:
+	li	$t0, 0			# i = 0
+	la	$t1, lista		# carregamento da lista
+	li	$t4, TRUE		# instrução virtual
+for_read:				#
+	bge	$t0, SIZE, setup_while	# for(i < SIZE)
+	#calcular o offset		#
+	la	$a0, str1		# instrução virtual
+	li	$v0, print_string	# instrução virtual
+	syscall				# print_string(str1)
+					#
+	li	$v0, read_int		# instrução virtual
+	syscall				# read_int()
+	move	$t3, $v0		# value = read_int()
+					#
+	sll	$t2, $t0, 2		# i * 4
+	addu	$t2, $t1, $t2		# endereço_final = &lista[0] + offset
+	sw	$t3, 0($t2)		# lista[i]
+					#
+	addi	$t0, $t0, 1		# i++
+	j	for_read		#}
+					#
+setup_while:				#
+	la	$t1, lista		# pTemp = lista
+	addiu	$t1, $t1, 40		# pUltimo = pTemp + 40 bytes
+					#
+					#
+do_while:				#
+	la	$t0, lista		# p = lista
+	li	$t4, FALSE		# houveTroca = FALSE
+					#
+for_sort:				#
+	bgeu	$t0, $t1, end_for_sort	# for(p < pUltimo)
+					#
+					#
+	lw	$t5, 0($t0)		# $t6 = *p
+	lw	$t6, 4($t0)		# $t7 = *p+1
+					#
+if:					#
+	ble	$t5, $t6, endif		# if(lista[i] > lista[i+1]
+	sw	$t7, 0($t0)		# aux = lista[i]
+	sw	$t5, 4($t0)		# lista[i] = lista[i+1]
+	sw	$t6, 0($t0)		# lista[i+1] = aux
+	li	$t4, TRUE		# houveTroca = TRUE
+					#
+endif:					#
+	addi	$t0, $t0, 4		# p++
+	j	for_sort		#}
+					#
+					#
+end_for_sort:				#
+	beq	$t4, TRUE, do_while	# while(houveTroca == TRUE)
+					#
+setup_for_print:			# 
+	la	$a0, str2		#
+	li	$v0, print_string	#
+	syscall				#
+					#
+	la	$t0, lista		# p = &lista[0]
+	la	$t1, lista		# pTemp = &lista[0]
+	addiu	$t1, $t1, 40		# pUltimo = pTemp + SIZE = 40 bytes
+					# 
+for_loop_print:				# 
+	bgeu	$t0, $t1, end_for	# p < pUltimo
+	lw	$t8, 0($t0)		# $t8 = *p
+	move	$a0, $t8		# instrução virtual
+	li	$v0, print_int10	# instrução virtual
+	syscall				# print_int10(*p)
+					# 
+	la	$a0, str3		# instrução virtual
+	li	$v0, print_string	# instrução virtual
+	syscall				# print_string("; ")
+	addiu	$t0, $t0, 4		# p++
+	j	for_loop_print		#}
+	
+end_for:
+	jr	$ra

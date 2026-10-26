@@ -1,0 +1,77 @@
+#Mapa de Registos
+# n_even:   $t0
+# n_odd:    $t1
+# p1:	    $t2
+# pUltimo1: $t3
+# p2:	    $t4
+# pUltimo2: $t5
+# resto:    $t6
+# *p1:	    $t7
+# *p2:	    $t8
+
+	.eqv	SIZE, 35
+	.eqv	print_int10, 1
+	.eqv	read_int, 5
+	.eqv	print_string, 4
+	
+	.data
+	.align	2
+a:	.space 140
+c:	.space 140
+str:	.asciiz	"\nIntroduza um número: "
+	.text
+	.globl main
+
+main:
+	li	$t0, 0		# n_even = 0
+	li	$t1, 0		# n_odd = 0
+	la	$t2, a
+	la	$t3, a		# pTemp1 = a[N]
+	la	$t5, c		# pUltimo1 = pTemp + 140 bytes
+	addiu	$t3, $t2, 140	# pTemp2 = c[N]
+	
+for_read:
+	bgeu	$t2, $t3, setup_sorting
+	
+	li	$v0, read_int
+	syscall
+	sw	$v0, 0($t2)
+	addiu	$t2, $t2, 4
+	j	for_read
+	
+setup_sorting:
+	la	$t2, a
+	la	$t4, c
+	
+for_sorting:
+	bgeu	$t2, $t3, setup_print
+	lw	$t7, 0($t2)
+	rem	$t6, $t7, 2
+	beq	$t6, 0, else
+	
+	sw	$t7, 0($t4)
+	addi	$t1, $t1, 1
+	addiu	$t4, $t4, 4
+	addiu	$t2, $t2, 4
+	j	for_sorting
+
+else:
+	addi	$t0, $t0, 1
+	addiu	$t2, $t2, 4
+	j	for_sorting
+	
+setup_print:
+	la	$t4, c
+	sll	$t6, $t1, 2
+	addu	$t5, $t4, $t6
+	
+for_print:
+	bgeu	$t4, $t5, end_for
+	lw	$a0, 0($t4)
+	li	$v0, print_int10
+	syscall
+	addiu	$t4, $t4, 4
+	j	for_print
+
+end_for:
+	jr	$ra

@@ -1,0 +1,77 @@
+# Mapa de Registos (Conforme o enunciado da Aula 5)
+# i:		$t0
+# lista:		$t1 (endereço base)
+# lista + i:	$t2 (endereço calculado do elemento)
+
+	.eqv	SIZE, 5
+	.eqv	print_int10, 1
+	.eqv	print_string, 4
+	.eqv	read_int, 5
+	
+	.data
+str_in:		.asciiz "\nIntroduza um numero: "
+str_out:	.asciiz "\nConteudo do array: "
+sep:		.asciiz ", "		# Para separar os números impressos
+	
+	.align	2
+lista:		.space	20		# CORREÇÃO: 5 inteiros * 4 bytes cada = 20 bytes!
+
+	.text
+	.globl main
+
+main:
+	li	$t0, 0			# i = 0
+	la	$t1, lista		# $t1 = endereço base do array 'lista'[cite: 6]
+	
+for_read:
+	bge	$t0, SIZE, end_for_read
+	
+	la	$a0, str_in	   
+	li	$v0, print_string 
+	syscall				# print_string("\nIntroduza um numero: ")
+	
+	li	$v0, read_int	 
+	syscall				# read_int()
+	
+	# As contas para lista[i]
+	sll	$t2, $t0, 2		# $t2 = i * 4 (desloca 2 bits à esquerda)[cite: 6, 7]
+	addu	$t2, $t1, $t2		# $t2 = endereço base + offset (Endereço de lista[i])[cite: 6]
+	sw	$v0, 0($t2)		# lista[i] = valor lido pelo syscall[cite: 6]
+	
+	addi	$t0, $t0, 1		# i++
+	j	for_read
+
+end_for_read:
+
+	# ---------------------------------------------------------
+	# CÓDIGO NOVO: IMPRIMIR O ARRAY PARA VERIFICAR O RESULTADO
+	# ---------------------------------------------------------
+	
+	la	$a0, str_out
+	li	$v0, print_string
+	syscall				# print_string("\nConteudo do array: ")
+	
+	li	$t0, 0			# i = 0 (Voltas a pôr o contador a zero para o novo ciclo!)
+	
+for_print:
+	bge	$t0, SIZE, end_for_print
+	
+	# Repetes as contas, porque o 'i' voltou a zero e está a avançar de novo
+	sll	$t2, $t0, 2		# $t2 = i * 4
+	addu	$t2, $t1, $t2		# $t2 = Endereço de lista[i]
+	
+	# Em vez de 'sw' (guardar), agora usas 'lw' (ler da memória)
+	lw	$a0, 0($t2)		# Lê o número que está em lista[i] diretamente para o $a0
+	li	$v0, print_int10  
+	syscall				# print_int10(lista[i])
+	
+	# Imprimir a vírgula para ficar bonito
+	la	$a0, sep
+	li	$v0, print_string
+	syscall				# print_string(", ")
+	
+	addi	$t0, $t0, 1		# i++
+	j	for_print
+
+end_for_print:
+	jr	$ra			# Fim do programa
